@@ -74,6 +74,39 @@ class Projectile {
 }
 
 
+class Particle {
+    constructor({position, speed, radius, color}){
+        this.position = position
+        this.speed = speed
+        this.radius = radius
+        this.color = color
+        this.opacity = 1
+    }
+    draw(){
+        //fade particle
+        ctx.save()
+        ctx.globalAlpha = this.opacity
+        //
+        ctx.beginPath()
+        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI*2)
+        ctx.fillStyle = this.color
+        ctx.fill()
+        ctx.closePath()
+        //
+        ctx.restore()
+    }
+
+    update() {
+        this.draw()
+        this.position.x += this.speed.x
+        this.position.y += this.speed.y
+
+        //fade out the particle
+        this.opacity -= 0.01
+    }
+}
+
+
 
 class EnemyProjectile {
     constructor({position, speed}){
@@ -196,6 +229,7 @@ const batman = new Batman()
 const projectiles = []
 const grids = []
 const enemyProjectiles = []
+const particles = []
 //monitor keypresses
 const keys = {
     a: {
@@ -219,6 +253,19 @@ function animate () {
     ctx.fillStyle = 'black'
     ctx.fillRect(0,0,canvas.width,canvas.height)
     batman.update()
+    // render explosions/particles
+    particles.forEach((particle, i)=>{
+        //remove particle when not visible
+        if(particle.opacity <= 0) {
+            // console.log('particle')
+            setTimeout(()=>{
+            particles.splice(i, 1)
+            },0)
+        }else{
+            particle.update()
+        }
+    })
+    console.log(particles)
     enemyProjectiles.forEach( (enemyProjectile, index) => {
         if(enemyProjectile.position.y + enemyProjectile.height >=canvas.height){
             setTimeout(() =>{
@@ -262,12 +309,14 @@ grids.forEach( (grid, gridIndex) =>{
 
         //moves invaders
         invader.update({speed: grid.speed})
+        //projectile hits enemy
         projectiles.forEach((projectile, j)=>{
-            //remove invades when hit
+            //remove enemies when hit
             if(projectile.position.y-projectile.radius <= invader.position.y+ invader.height&&
                  projectile.position.x + projectile.radius>= invader.position.x &&
                  projectile.position.x - projectile.radius<= invader.position.x + invader.width&&
-                 projectile.position.y + projectile.radius >= invader.position.y){
+                 projectile.position.y + projectile.radius >= invader.position.y){ 
+
                 setTimeout(()=>{
                     //check if the projectile and enemy are found
                     const invaderFound= grid.invaders.find(invader2=>{
@@ -278,6 +327,22 @@ grids.forEach( (grid, gridIndex) =>{
                     })
                     //remove the projectile and enemy 
                     if(invaderFound&& projectileFound){
+                     //explosions
+                        for(let i=0; i< 15; i++){
+                            particles.push(new Particle({
+                                position:{
+                                    x: invader.position.x + invader.width/2,
+                                    y: invader.position.y + invader.height/2
+                                },
+                                speed:{
+                                    // make the explosions go all directions
+                                    x: (Math.random()- 0.5) * 2,
+                                    y: (Math.random() -0.5) * 2
+                                },
+                                radius: Math.random()*3,
+                                color: "#BAA9DE"
+                            }))
+                        }
                         grid.invaders.splice(i,1)
                         projectiles.splice(j,1)
                         //set new width and position when removing columns
@@ -316,7 +381,7 @@ grids.forEach( (grid, gridIndex) =>{
     if(frames %randomInterval === 0){
         grids.push(new Grid())
         // set new random timeinterval
-        randomInterval = Math.floor(Math.random() *500 +500)
+        randomInterval = Math.floor(Math.random() *500 +800)
     }
 
 
@@ -329,7 +394,7 @@ animate()
 window.addEventListener('keydown', ({key})=>{
     //check which key was pressed
     // console.log(key)
-    switch(key){
+    switch(key.toLowerCase()){
         case 'a':
             // console.log('left')
             keys.a.pressed = true
@@ -350,7 +415,7 @@ window.addEventListener('keydown', ({key})=>{
                     y: -10
                 }
             }))
-            console.log(projectiles)
+            // console.log(projectiles)
             keys.space.pressed = true
             break         
     }
@@ -359,7 +424,7 @@ window.addEventListener('keydown', ({key})=>{
 window.addEventListener('keyup', ({key})=>{
     //check which key was pressed
     // console.log(key)
-    switch(key){
+    switch(key.toLowerCase()){
         case 'a':
             // console.log('left')
             keys.a.pressed = false
