@@ -246,6 +246,27 @@ const keys = {
 let frames = 0
 let randomInterval = Math.floor(Math.random() *500 +500)
 
+
+function createParticles ({object, color}){
+    //explosions
+    for(let i=0; i< 15; i++){
+        particles.push(new Particle({
+            position:{
+                x: object.position.x + object.width/2,
+                y: object.position.y + object.height/2
+                },
+                speed:{
+                // make the explosions go all directions
+                x: (Math.random()- 0.5) * 2,
+                y: (Math.random() -0.5) * 2
+                },
+                radius: Math.random()*3,
+                color:  color || "#BAA9DE"
+            }))
+        }
+}
+
+
 //recursive refresh
 function animate () {
     // console.log('animating')
@@ -265,7 +286,9 @@ function animate () {
             particle.update()
         }
     })
+    
     console.log(particles)
+
     enemyProjectiles.forEach( (enemyProjectile, index) => {
         if(enemyProjectile.position.y + enemyProjectile.height >=canvas.height){
             setTimeout(() =>{
@@ -280,6 +303,10 @@ function animate () {
             enemyProjectile.position.x + enemyProjectile.width >= batman.position.x&&
             enemyProjectile.position.x <= batman.position.x + batman.width){
             console.log("you lose")
+            createParticles({
+                object: batman,
+                color: "white"
+            })
         }
     })
    
@@ -328,21 +355,9 @@ grids.forEach( (grid, gridIndex) =>{
                     //remove the projectile and enemy 
                     if(invaderFound&& projectileFound){
                      //explosions
-                        for(let i=0; i< 15; i++){
-                            particles.push(new Particle({
-                                position:{
-                                    x: invader.position.x + invader.width/2,
-                                    y: invader.position.y + invader.height/2
-                                },
-                                speed:{
-                                    // make the explosions go all directions
-                                    x: (Math.random()- 0.5) * 2,
-                                    y: (Math.random() -0.5) * 2
-                                },
-                                radius: Math.random()*3,
-                                color: "#BAA9DE"
-                            }))
-                        }
+                        createParticles({
+                            object: invader
+                        })
                         grid.invaders.splice(i,1)
                         projectiles.splice(j,1)
                         //set new width and position when removing columns
