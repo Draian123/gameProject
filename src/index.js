@@ -1,3 +1,4 @@
+const scoreEl = document.querySelector('#scoreEl');
 const canvas = document.querySelector('canvas');
 const ctx= canvas.getContext('2d')
 
@@ -254,6 +255,7 @@ let game = {
     over: false,
     active: true
 }
+let score = 0
 
 //background stars
 for(let i=0; i< 100; i++){
@@ -323,7 +325,7 @@ function animate () {
         }
     })
     
-    console.log(particles)
+    // console.log(particles)
 
     enemyProjectiles.forEach( (enemyProjectile, index) => {
         if(enemyProjectile.position.y + enemyProjectile.height >=canvas.height){
@@ -338,7 +340,7 @@ function animate () {
         if(enemyProjectile.position.y + enemyProjectile.height >= batman.position.y&& 
             enemyProjectile.position.x + enemyProjectile.width >= batman.position.x&&
             enemyProjectile.position.x <= batman.position.x + batman.width){
-                console.log("you lose")
+                // console.log("you lose")
                 setTimeout(() =>{
                     //remove enemyprojectile 
                     enemyProjectiles.splice(index, 1)
@@ -401,6 +403,9 @@ grids.forEach( (grid, gridIndex) =>{
                     })
                     //remove the projectile and enemy 
                     if(invaderFound&& projectileFound){
+                    score += 100
+                    scoreEl.innerHTML = score
+
                      //explosions
                         createParticles({
                             object: invader,
