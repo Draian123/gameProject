@@ -2,8 +2,11 @@ const scoreEl = document.querySelector('#scoreEl');
 const canvas = document.querySelector('canvas');
 const ctx= canvas.getContext('2d')
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// canvas.width = window.innerWidth; 
+canvas.width = 1024; 
+
+// canvas.height = window.innerHeight;
+canvas.height = 576;
 
 
 class Batman {
@@ -19,8 +22,8 @@ class Batman {
         image.src = './images/batman.png'
         image.onload = () => {
             this.image = image
-            this.width = image.width *.13
-            this.height = image.height *.13
+            this.width = image.width *.08
+            this.height = image.height *.08
             this.position = {
                 x: canvas.width / 2 - this.width / 2,
                 y: canvas.height  - this.height - 20
@@ -199,7 +202,7 @@ class Grid {
 
         //random number of collums/ rows but minimum 5c/2r
         const columns = Math.floor(Math.random()*5 + 5)
-        const rows = Math.floor(Math.random()*5 + 2)
+        const rows = Math.floor(Math.random()*5 + 0)
         //width of invadersgrid
         this.width = columns * 30
         for(let x = 0; x < columns;x++){
@@ -449,7 +452,7 @@ grids.forEach( (grid, gridIndex) =>{
     if(frames %randomInterval === 0){
         grids.push(new Grid())
         // set new random timeinterval
-        randomInterval = Math.floor(Math.random() *500 +800)
+        randomInterval = Math.floor(Math.random() *500 +900)
     }
 
 
