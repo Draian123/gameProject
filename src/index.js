@@ -13,7 +13,7 @@ class Batman {
             y: 0
         }
         this.rotation = 0;
-
+        this.opacity = 1
         const image = new Image();
         image.src = './images/batman.png'
         image.onload = () => {
@@ -31,6 +31,9 @@ class Batman {
     draw() {
         //save and restore needed for rotate
         ctx.save()
+        //opacity
+        ctx.globalAlpha = this.opacity
+        //
         ctx.translate(
             batman.position.x + batman.width /2,
              batman.position.y + batman.height /2)
@@ -75,12 +78,13 @@ class Projectile {
 
 
 class Particle {
-    constructor({position, speed, radius, color}){
+    constructor({position, speed, radius, color, fades}){
         this.position = position
         this.speed = speed
         this.radius = radius
         this.color = color
         this.opacity = 1
+        this.fades = fades
     }
     draw(){
         //fade particle
@@ -102,6 +106,7 @@ class Particle {
         this.position.y += this.speed.y
 
         //fade out the particle
+        if(this.fades)
         this.opacity -= 0.01
     }
 }
@@ -245,9 +250,30 @@ const keys = {
 
 let frames = 0
 let randomInterval = Math.floor(Math.random() *500 +500)
+let game = {
+    over: false,
+    active: true
+}
+
+//background stars
+for(let i=0; i< 100; i++){
+    particles.push(new Particle({
+        position:{
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height
+            },
+            speed:{
+            // make the explosions go all directions
+            x: 0,
+            y: 0.3
+            },
+            radius: Math.random()*2,
+            color:  "white"
+        }))
+    }
 
 
-function createParticles ({object, color}){
+function createParticles ({object, color, fades}){
     //explosions
     for(let i=0; i< 15; i++){
         particles.push(new Particle({
@@ -261,7 +287,8 @@ function createParticles ({object, color}){
                 y: (Math.random() -0.5) * 2
                 },
                 radius: Math.random()*3,
-                color:  color || "#BAA9DE"
+                color:  color || "#BAA9DE",
+                fades: fades
             }))
         }
 }
@@ -269,13 +296,22 @@ function createParticles ({object, color}){
 
 //recursive refresh
 function animate () {
-    // console.log('animating')
+    // if game over dont run code below
+    if(!game.active) return
+
+
     requestAnimationFrame(animate)
     ctx.fillStyle = 'black'
     ctx.fillRect(0,0,canvas.width,canvas.height)
     batman.update()
     // render explosions/particles
     particles.forEach((particle, i)=>{
+        //background stars looping with random x
+        if(particle.position.y -particle.radius > canvas.height){
+            particle.position.x = Math.random() * canvas.width
+            particle.position.y = -particle.radius
+        }
+
         //remove particle when not visible
         if(particle.opacity <= 0) {
             // console.log('particle')
@@ -298,14 +334,25 @@ function animate () {
         }else{
             enemyProjectile.update()
         }
-        //losecondition
+        //losecondition projectile hits batman
         if(enemyProjectile.position.y + enemyProjectile.height >= batman.position.y&& 
             enemyProjectile.position.x + enemyProjectile.width >= batman.position.x&&
             enemyProjectile.position.x <= batman.position.x + batman.width){
-            console.log("you lose")
+                console.log("you lose")
+                setTimeout(() =>{
+                    //remove enemyprojectile 
+                    enemyProjectiles.splice(index, 1)
+                    batman.opacity = 0
+                    game.over = true
+                }, 0)
+                // allows game to show explostion after it is over 
+                setTimeout(() =>{
+                    game.active = false
+                }, 2000)
             createParticles({
                 object: batman,
-                color: "white"
+                color: "white",
+                fades: true
             })
         }
     })
@@ -356,7 +403,8 @@ grids.forEach( (grid, gridIndex) =>{
                     if(invaderFound&& projectileFound){
                      //explosions
                         createParticles({
-                            object: invader
+                            object: invader,
+                            fades: true
                         })
                         grid.invaders.splice(i,1)
                         projectiles.splice(j,1)
@@ -407,6 +455,8 @@ animate()
 
 //destructoring the key from event obj
 window.addEventListener('keydown', ({key})=>{
+    if(game.over) return
+
     //check which key was pressed
     // console.log(key)
     switch(key.toLowerCase()){
