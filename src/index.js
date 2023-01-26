@@ -233,13 +233,15 @@ class Grid {
 }
 
 
-const batman = new Batman()
-const projectiles = []
-const grids = []
-const enemyProjectiles = []
-const particles = []
+let batman = new Batman()
+let projectiles = []
+let grids = []
+let enemyProjectiles = []
+let particles = []
+
+
 //monitor keypresses
-const keys = {
+let keys = {
     a: {
         pressed: false
     },
@@ -259,22 +261,66 @@ let game = {
 }
 let score = 0
 
-//background stars
-for(let i=0; i< 100; i++){
-    particles.push(new Particle({
-        position:{
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height
-            },
-            speed:{
-            // make the explosions go all directions
-            x: 0,
-            y: 0.3
-            },
-            radius: Math.random()*2,
-            color:  "white"
-        }))
+function init(){
+    batman = new Batman()
+    projectiles = []
+    grids = []
+    enemyProjectiles = []
+    particles = []
+    keys = {
+        a: {
+            pressed: false
+        },
+        d: {
+            pressed:false
+        },
+        space:{
+            pressed: false
+        }
     }
+    
+    frames = 0
+    randomInterval = Math.floor(Math.random() *500 +500)
+    game = {
+        over: false,
+        active: true
+    }
+    score = 0
+
+    //background stars
+    for(let i=0; i< 100; i++){
+        particles.push(new Particle({
+            position:{
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height
+                },
+                speed:{
+                // make the explosions go all directions
+                x: 0,
+                y: 0.3
+                },
+                radius: Math.random()*2,
+                color:  "white"
+            }))
+        }
+    
+}
+//background stars
+// for(let i=0; i< 100; i++){
+//     particles.push(new Particle({
+//         position:{
+//             x: Math.random() * canvas.width,
+//             y: Math.random() * canvas.height
+//             },
+//             speed:{
+//             // make the explosions go all directions
+//             x: 0,
+//             y: 0.3
+//             },
+//             radius: Math.random()*2,
+//             color:  "white"
+//         }))
+//     }
 
 
 function createParticles ({object, color, fades}){
@@ -344,14 +390,16 @@ function animate () {
             enemyProjectile.position.x <= batman.position.x + batman.width){
                 // console.log("you lose")
                 setTimeout(() =>{
-                    //remove enemyprojectile 
+                    //remove enemyprojectile  and makes batman disappear
                     enemyProjectiles.splice(index, 1)
                     batman.opacity = 0
                     game.over = true
                 }, 0)
                 // allows game to show explostion after it is over 
+                //and stops game alltogether
                 setTimeout(() =>{
                     game.active = false
+                    document.querySelector('#restartScreen').style.display='flex'
                 }, 2000)
             createParticles({
                 object: batman,
@@ -457,7 +505,21 @@ grids.forEach( (grid, gridIndex) =>{
 
     frames ++
 }
-animate()
+// animate()
+
+//start screen to game
+document.querySelector('#startButton').addEventListener('click',()=>{
+    document.querySelector('#startScreen').style.display = 'none';
+    document.querySelector('#scoreContainer').style.display = 'block';
+    init()
+    animate()
+})
+
+document.querySelector('#restartButton').addEventListener('click',()=>{
+    document.querySelector('#restartScreen').style.display = 'none';
+    init()
+    animate()
+})
 
 
 //destructoring the key from event obj
