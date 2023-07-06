@@ -1,5 +1,5 @@
 # gameProject
-BatmanShooterGangGang
+BatmanShooter
 https://draian123.github.io/gameProject/
 
 Description
